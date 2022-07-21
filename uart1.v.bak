@@ -1,0 +1,57 @@
+module uart1(
+
+input clk;
+input [7:0] in;
+output tx);
+
+parameter  idle=3'b000, 
+  start=3'b001,
+  databit=3'b011, 
+  stop=3'b010; 
+reg [2:0] state; 
+ // to store a copy of input data
+reg [2:0] bitIdx = 3'b0; // for 8-bit data
+reg [2:0] idx;
+reg out;
+reg data;
+
+assign Idx = bitIdx;
+always @(posedge clk)
+begin
+	case (state)
+		default : begin
+		state = idle;
+		end
+		
+		idle : begin
+		out <= 1'b1;
+		bitIdx  <= 3'b0;
+		data <=in;
+		state <= start;
+		end
+		
+		start: begin
+		out <= 1'b0;
+		state <= databit;
+		end
+		
+		databit : begin
+		out <= data[idx];
+		if (&bitIdx) begin
+			bitIdx  <= 3'b0;
+         state   <= `stop;
+      end else begin
+         bitIdx  <= bitIdx + 1'b1;
+      end
+      end
+		
+		stop: begin
+		data <= 8'b0;
+		state <= idle;
+		end
+	endcase
+	
+	
+end
+
+endmodule
